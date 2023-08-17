@@ -26,13 +26,12 @@ class Contact(db.Model):
     )
     deletedAt = db.Column(db.DateTime, nullable=True)
 
-    def _repr_(self):
+    def __repr__(self):
         return f"<Contact {self.id}>"
 
 
 def find_and_link_contact(email=None, phoneNumber=None):
-    # check if email or phone number is provided
-    if not email or not phoneNumber:
+    if not email and not phoneNumber:
         return None
 
     # query the database for existing contacts with the same email or phone number
@@ -90,12 +89,16 @@ def get_contact_response(contact):
     contact_response = {
         "primarycontactid": contact.id,
         "emails": [contact.email],
-        "phoneNumbers": [contact.phoneNumber],
+        "phoneNumbers": [contact.phoneNumber]
+        if contact.phoneNumber
+        else [contact.phoneNumber],
         "secondarycontactids": [],
     }
 
     # query the database for secondary contacts linked to the primary one
     secondary_contacts = Contact.query.filter(Contact.linkedId == contact.id).all()
+    print("Secondary contacts : " + str(secondary_contacts))
+    print("hi")
 
     # loop through the secondary contacts and add their information to the consolidated contact dictionary
     for secondary_contact in secondary_contacts:
